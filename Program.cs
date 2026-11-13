@@ -27,7 +27,7 @@ while (executing)
         switch (option)
         {
             case "1":
-                GameRegister();
+                Register();
                 break;
 
             case "2":
@@ -51,37 +51,74 @@ while (executing)
 
 void GameList()
 {
-    var gamesList = service.Listar();
-    foreach (var item in gamesList)
+    Console.Clear();
+
+    Console.WriteLine("======== REGISTERED GAMES ========");
+    var games = service.Listar();
+    if (games.Count == 0) { Console.WriteLine("NO GAMES REGISTERED"); }
+    else
     {
-        Console.WriteLine($"Id: {item.Id} Name: {item.Nome} - Price: {item.Preco:c2}");
+        foreach (var item in games)
+        {
+            ShowGame(item);
+        }
     }
 }
 
-void GameRegister()
+void ShowGame(Game game)
+{
+    Console.WriteLine
+    ($"""
+    -----------------------------------------
+    ID: {game.Id}
+    Name: {game.Nome}
+    Developer: {game.Desenvolvedora}
+    Gender: {game.Genero}
+    Year: {game.AnoLancamento}
+    Price: {game.Preco}
+    """);
+
+    Pausar();
+}
+
+void Pausar()
+{
+    Console.WriteLine("\nPress ENTER to continue");
+    Console.ReadLine();
+}
+
+void Register()
+{
+    Console.Clear();
+
+    Console.WriteLine("======= REGISTER GAME =======");
+
+    var game = ReadGameDate();
+
+    service.Register(game);
+
+    Console.WriteLine("\nGame registered successfully!");
+    Pausar();
+}
+
+Game ReadGameDate()
 {
     Game newGame = new();
 
-    Console.Write("Enter the game name: ");
-    newGame.Nome = Console.ReadLine()!;
-
+    Console.Write("Enter the game name: ");         
+    newGame.Nome = Console.ReadLine() ?? "Name not provided";
+         
     Console.Write("Enter the developer name: ");
-    newGame.Desenvolvedora = Console.ReadLine()!;
-
+    newGame.Desenvolvedora = Console.ReadLine() ?? "Developer not provided" ;
+         
     Console.Write("Enter the game gender: ");
-    newGame.Genero = Console.ReadLine()!;
-
+    newGame.Genero = Console.ReadLine()?? "Gender not provided";
+         
     Console.Write("Enter the release year: ");
-    newGame.AnoLancamento = int.Parse(Console.ReadLine()!);
-    
+    newGame.AnoLancamento = int.Parse(Console.ReadLine() ?? "Year not provided");
+
     Console.Write("Enter the game price: ");
-    newGame.Preco = decimal.Parse(Console.ReadLine()!);
+    newGame.Preco = decimal.Parse(Console.ReadLine() ?? "Price not provided");
 
-    if (!service.GameRegister(newGame))
-    {
-        Console.WriteLine("Error: Some data was recorded incorrectly. Please check again!");
-        return;
-    }
-
-    Console.WriteLine("REGISTERED GAME");
+    return newGame;
 }

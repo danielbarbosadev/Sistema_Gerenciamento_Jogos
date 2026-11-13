@@ -11,13 +11,13 @@ namespace DadosComCSV.Repositories
         {
             // Cria a pasta e o arquivo com o cabeçalho se ainda não existirem
             // Combina e monta caminhos usando o separador correto do sistema
-                                            //Environment.CurrentDirectory -> home/user/Documents/Senai/dotnet/DadosComCSV
-                                            // "Data" -> /Data
-                                            // Path.Combine -> Environment.CurrentDirectory + "Data"
-            string dataFolder = Path.Combine(Environment.CurrentDirectory, "Data"); 
+            //Environment.CurrentDirectory -> home/user/Documents/Senai/dotnet/DadosComCSV
+            // "Data" -> /Data
+            // Path.Combine -> Environment.CurrentDirectory + "Data"
+            string dataFolder = Path.Combine(Environment.CurrentDirectory, "Data");
             Directory.CreateDirectory(dataFolder);
 
-                                  //home/user/Documents/Senai/Praticas_CSharp/DadosComCSV/Data/games.csv 
+            //home/user/Documents/Senai/Praticas_CSharp/DadosComCSV/Data/games.csv 
             _filePath = Path.Combine(dataFolder, "games.csv");
 
             if (!File.Exists(_filePath))
@@ -61,26 +61,32 @@ namespace DadosComCSV.Repositories
             return games;
         }
 
-        public bool GameRegister(Game gameInfo)
+        public void SaveAll(List<Game> gameList)
         {
-            try
+            var lines = new List<String>
             {
-                File.AppendAllText
-                (_filePath!, 
-                $"{gameInfo.Id};{gameInfo.Nome};{gameInfo.Desenvolvedora};{gameInfo.Genero};{gameInfo.AnoLancamento};{gameInfo.Preco}" + Environment.NewLine, Encoding.UTF8);
+                "Id;Nome;Desenvolvedora;Genero;AnoLancamento;Preco"
+            };
 
-                return true;
-            }
-            catch (UnauthorizedAccessException uea )
-            {
-                Console.WriteLine($"Error: {uea}");
-                return false;
-            }
-            catch (IOException ioe)
-            {
-                Console.WriteLine($"Error: {ioe}");
-                return false;
-            }
+            lines.AddRange(gameList.Select(g => string.Join(";",
+                g.Id.ToString(),
+                g.Nome,
+                g.Desenvolvedora,
+                g.Genero,
+                g.AnoLancamento.ToString(),
+                g.Preco.ToString()
+            )));
+
+            File.AppendAllLines(_filePath!, lines, new UTF8Encoding(false));
         }
-    }   
+        public void Add(Game game)
+        {
+            var gameList = Listar();
+
+            game.Id = gameList.Count == 0 ? 1 : gameList.Max(idMax => idMax.Id) + 1;
+
+            gameList.Add(game);
+            SaveAll(gameList);
+        }
+    }
 }
